@@ -6,6 +6,9 @@ const { DateTime } = require('luxon');
 
 let lastTimestamp = 0;
 
+// Đăng ký 1 lần, mọi thay đổi waterVolume sẽ bắn qua WS
+listenToSensorData(sendDataToClient);
+
 client.on('message', async function (topic, message) {
     let data = message.toString();
     let split = data.trim().split("|");
@@ -65,7 +68,7 @@ client.on('message', async function (topic, message) {
     // add data to firebase
     await addData(today, millisecond, temp, humidity, humidityInSideHouse);
     await handleWaterVolumeToday();
-    listenToSensorData(sendDataToClient);
+    // listenToSensorData(sendDataToClient);
 });
 
 //Send data to frontend

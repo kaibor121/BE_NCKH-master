@@ -555,6 +555,61 @@ exports.handleWaterVolumeToday = async () => {
     // console.log(`Lượng nước với kc085 là ${currentVolumeWithKc085} lít`);
     // console.log(`Lượng nước với kc06 là ${currentVolumeWithKc06} lít`);
 
-    await firebaseStore.addDataWaterVolume(dataSensor.humd, ETc_kc05, ETc_kc085, ETc_kc06, today.getTime());
-
+    // await firebaseStore.addDataWaterVolume(dataSensor.humd, ETc_kc05, ETc_kc085, ETc_kc06, today.getTime());
+    await firebaseStore.addDataWaterVolume(
+        dataSensor.humd,
+        ETc_kc05,
+        ETc_kc085,
+        ETc_kc06,
+        today.getTime(),
+        { ETo } // Lưu ETo để FE có thể suy ETc theo Kc động
+    );
 }
+
+
+// Tính Kc theo giai đoạn (dựa vào cropType + startDate)
+exports.getKcForDate = (crop, startDateMs, dateMs) => {
+    if (!crop || !startDateMs || !dateMs) return { stage: 'unknown', kc: 0.85 };
+
+    const {
+        kcInit = 0.4,
+        kcMid = 1.1,
+        kcEnd = 0.8,
+        daysInit = 20,
+        daysDev = 30,
+        daysMid = 40,
+        daysLate = 30
+    } = crop;
+
+    const d = Math.floor((dateMs - startDateMs) / (24 * 60 * 60 * 1000));
+    const t1 = daysInit;
+    const t2 = t1 + daysDev;
+    const t3 = t2 + daysMid;
+    const t4 = t3 + daysLate;
+
+    if (d < 0) return { stage: 'before', kc: kcInit };
+    if (d <= t1) return { stage: 'init', kc: kcInit };
+    if (d <= t2) {
+        const p = (d - t1) / Math.max(1, daysDev);
+        return { stage: 'dev', kc: kcInit + p * (kcMid - kcInit) };
+    }
+    if (d <= t3) return { stage: 'mid', kc: kcMid };
+    if (d <= t4) {
+        const p = (d - t3) / Math.max(1, daysLate);
+        return { stage: 'late', kc: kcMid + p * (kcEnd - kcMid) };
+    }
+    return { stage: 'finished', kc: kcEnd };
+};
+
+// Dự báo 7 ngày với danh sách Kc theo từng ngày
+exports.calculateWaterVolumesDynamic = async (areaInSquareMeters, kcList) => {
+    try {
+        const EToList = await this.getWeatherETo7days(); // 7 giá trị ETo
+        if (!Array.isArray(EToList) || EToList.length < 7) return [];
+        const waterVolumes = EToList.map((ETo, idx) => ETo * (kcList[idx] ?? kcList.at(-1) ?? 0.85) * areaInSquareMeters);
+        return waterVolumes;
+    } catch (e) {
+        console.error('calculateWaterVolumesDynamic error:', e);
+        return [];
+    }
+};
