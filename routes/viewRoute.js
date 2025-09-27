@@ -34,8 +34,6 @@ router.post('/seedWaterVolume', viewController.seedWaterVolume);
 
 
 router.get('/me', authController.isLogin, authController.me);
-
-// Bắt buộc đăng nhập
 router.get('/dashboard-gardens', authController.isLogin, authController.requireAuth, viewController.getDashboardGardens);
 
 router.get('/crops', authController.isLogin, authController.requireAuth, cropController.list);

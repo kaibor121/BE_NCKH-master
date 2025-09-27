@@ -119,46 +119,7 @@ exports.getDataFromSensorData = async () => {
     return data;
 }
 
-// exports.getWaterDataFromYesterday = async () => {
-//     const date = new Date();
-//     // Get yesterday's date
-//     const yesterday = new Date(date.getTime());
-//     yesterday.setDate(yesterday.getDate() - 1);
-//     console.log('Yesterday\'s date in Firebase: ', yesterday);
 
-//     const waterVolumeRef = collection(firebaseStore.db, "waterVolume");
-
-//     const q = query(waterVolumeRef, where('timestamp', '==', 'Tue Jan 14 2025'), orderBy('millisecond', 'desc'));
-//     let data = [];
-//     const querySnapshot = await getDocs(q);
-//     querySnapshot.forEach(doc => {
-//         data.push(doc.data())
-//     })
-
-//     return data.reverse();
-// };
-
-
-// hàm thứ 2
-// exports.getWaterDataFromYesterday = async () => {
-//     const today = new Date();
-//     const yesterday = new Date(today.getTime());
-//     yesterday.setDate(yesterday.getDate() - 1);
-
-//     const waterVolumeRef = collection(firebaseStore.db, "waterVolume");
-//     const q = query(
-//     waterVolumeRef,
-//     where('timestamp', '==', yesterday.toDateString()),
-//     orderBy('millisecond', 'desc')
-//     );
-
-//     const data = [];
-//     const snap = await getDocs(q);
-//     snap.forEach(doc => data.push(doc.data()));
-//     return data.reverse();
-// };
-
-// hàm thứ 3
 exports.getWaterDataFromYesterday = async () => {
     const y = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
     const waterVolumeRef = collection(firebaseStore.db, "waterVolume");
@@ -170,38 +131,6 @@ exports.getWaterDataFromYesterday = async () => {
 };
 
 
-// exports.getDataFromWaterVolume = async () => {
-//     const date = new Date();
-//     const current = new Date(date.getTime());
-//     const waterVolumeRef = collection(firebaseStore.db, "waterVolume");
-
-//     const q = query(waterVolumeRef, where('timestamp', '==', 'Wed Jan 15 2025'), orderBy('millisecond', 'desc'));
-//     let data = [];
-//     const querySnapshot = await getDocs(q);
-//     querySnapshot.forEach(doc => {
-//         data.push(doc.data())
-//     })
-
-//     return data.reverse()
-// }
-
-// hàm thứ 2
-// exports.getDataFromWaterVolume = async () => {
-//     const today = new Date();
-//     const waterVolumeRef = collection(firebaseStore.db, "waterVolume");
-//     const q = query(
-//         waterVolumeRef,
-//         where('timestamp', '==', today.toDateString()),
-//         orderBy('millisecond', 'desc')
-//     );
-//     const data = [];
-//     const snap = await getDocs(q);
-//     snap.forEach(doc => data.push(doc.data()));
-//     return data.reverse();
-// };
-
-
-// hàm thứ 3
 exports.getDataFromWaterVolume = async () => {
     const today = new Date().toDateString();
     const waterVolumeRef = collection(firebaseStore.db, "waterVolume");
@@ -328,15 +257,8 @@ exports.addGarden = async (user, nameGarden, typeGarden, method, area, note, lat
 exports.getAllGardens = async (user) => {
     const userID = await this.findUser(user.email)
     let data = [];
-
     const q = query(collection(firebaseStore.db, "garden"), where("user", "==", userID.id), orderBy("timestamp", "desc"));
-    // const q = query(collection(firebaseStore.db, "garden"), where("user", "==", userID.id));
-
     const querySnapshot = await getDocs(q);
-
-    // querySnapshot.forEach((doc) => {
-    //     data.push(doc.data())
-    // });
 
     querySnapshot.forEach((docSnap) => {
         data.push({ id: docSnap.id, ...docSnap.data() });
@@ -348,14 +270,6 @@ exports.getAllGardens = async (user) => {
     return data;
 }
 
-
-// exports.getGardenById = async (user, id) => {
-//     const userID = await this.findUser(user.email);
-//     const ref = doc(firebaseStore.db, 'garden', id);
-//     const snap = await getDoc(ref);
-//     if (snap.exists()) return { id: snap.id, ...snap.data() };
-//     return null;
-// };
 
 exports.getGardenById = async (user, id) => {
     const ref = doc(firebaseStore.db, 'garden', id);
@@ -401,9 +315,7 @@ exports.updateGarden = async (user, name, updates) => {
 
 
         const q = query(collection(firebaseStore.db, "garden"), where("user", "==", userID.id), where("nameGarden", "==", name));
-
         const querySnapshot = await getDocs(q);
-
         let gardenID;
 
         querySnapshot.forEach((doc) => {
@@ -428,9 +340,7 @@ exports.deleteGarden = async (user, nameGarden) => {
 
     try {
         const q = query(collection(firebaseStore.db, "garden"), where("user", "==", userID.id), where("nameGarden", "==", nameGarden));
-
         const querySnapshot = await getDocs(q);
-
         let gardenID;
 
         querySnapshot.forEach((doc) => {
@@ -447,7 +357,7 @@ exports.deleteGarden = async (user, nameGarden) => {
 
 exports.seedWaterVolumeForToday = async () => {
     const now = new Date();
-    const dayStr = now.toDateString(); // phải trùng loại chuỗi khi insert
+    const dayStr = now.toDateString(); 
     const base = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0); // 7:00 AM
 
     // 10 mốc giờ 7:00 -> 16:00

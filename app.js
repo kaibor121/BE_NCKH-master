@@ -47,41 +47,12 @@ const fontSrcUrls = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/'
 ];
 
-// app.use(
-//     helmet.contentSecurityPolicy({
-//         directives: {
-//             defaultSrc: ["'self'", 'http://127.0.0.1:5500/*', 'https://localhost:5500'],
-//             connectSrc: ["'self'",
-//                 'http://127.0.0.1:5500',
-//                 'http://localhost:5500',
-//                 'ws://127.0.0.1:5500/',
-//                 `ws://localhost:5500/`,
-//                 'https://maps.googleapis.com'],
-//             scriptSrc: ["'self'", "'nonce-yourNonce'",
-//                 "'sha256-ajGjo5eD0JzFPdnpuutKT6Sb5gLu+Q9ru594rwJogGQ='",
-//                 "'unsafe-eval'",
-//                 ...scriptSrcUrls],
-//             styleSrc: styleSrcUrls,
-//             fontSrc: fontSrcUrls,
-//             imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
-//             frameSrc: ["'self'"],
-//             objectSrc: ["'none'"],
-//             workerSrc: ["'self'", 'blob:'],
-//             childSrc: ["'self'", 'blob:'],
-//             upgradeInsecureRequests: []
-//         }
-//     })
-// );
 
     if (process.env.ENV === 'development') {
         app.use(helmet({ contentSecurityPolicy: false }));
     } else {
         app.use(helmet());
     }
-
-
-
-// handleWaterVolumeToday()
 
 app.use('/api/view', viewRouter)
 
