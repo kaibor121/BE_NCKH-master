@@ -52,5 +52,5 @@ router.get('/sensors-meta', authController.isLogin, authController.requireAuth, 
 router.post('/sensors-meta', authController.isLogin, authController.requireAuth, sensorController.create);
 router.patch('/sensors-meta/:id', authController.isLogin, authController.requireAuth, sensorController.update);
 router.delete('/sensors-meta/:id', authController.isLogin, authController.requireAuth, sensorController.remove);
-
+// 
 module.exports = router;
