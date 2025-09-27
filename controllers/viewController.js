@@ -526,3 +526,14 @@ exports.seedWaterVolume = async (req, res) => {
     res.status(201).json({ status: 'success' });
 };
 
+exports.getGardenById = catchAsync(async (req, res) => {
+    const user = req.user;
+    const { id } = req.params;
+    if (!user) return res.status(401).json({ status: 'fail', message: 'Vui lòng đăng nhập' });
+    if (!id) return res.status(400).json({ status: 'fail', message: 'Thiếu id' });
+
+    const data = await firebaseStore.getGardenById(user, id);
+    if (!data) return res.status(404).json({ status: 'fail', message: 'Không tìm thấy vườn' });
+
+    return res.status(200).json({ status: 'success', data });
+});

@@ -2,7 +2,8 @@ const firebaseStore = require('../models/firebase');
 const catchAsync = require('../middlewares/catchAsync');
 
 exports.list = catchAsync(async (req, res) => {
-    const data = await firebaseStore.getSensorsMeta(req.user);
+    const { gardenId } = req.query;
+    const data = await firebaseStore.getSensorsMeta(req.user, gardenId || null);
     res.status(200).json({ status: 'success', data });
 });
 
@@ -12,13 +13,11 @@ exports.create = catchAsync(async (req, res) => {
 });
 
 exports.update = catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await firebaseStore.updateSensorMeta(req.user, id, req.body);
+    await firebaseStore.updateSensorMeta(req.user, req.params.id, req.body);
     res.status(200).json({ status: 'success' });
 });
 
 exports.remove = catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await firebaseStore.deleteSensorMeta(req.user, id);
+    await firebaseStore.deleteSensorMeta(req.user, req.params.id);
     res.status(200).json({ status: 'success' });
 });

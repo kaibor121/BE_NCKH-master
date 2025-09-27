@@ -349,14 +349,19 @@ exports.getAllGardens = async (user) => {
 }
 
 
+// exports.getGardenById = async (user, id) => {
+//     const userID = await this.findUser(user.email);
+//     const ref = doc(firebaseStore.db, 'garden', id);
+//     const snap = await getDoc(ref);
+//     if (snap.exists()) return { id: snap.id, ...snap.data() };
+//     return null;
+// };
+
 exports.getGardenById = async (user, id) => {
-    const userID = await this.findUser(user.email);
     const ref = doc(firebaseStore.db, 'garden', id);
     const snap = await getDoc(ref);
-    if (snap.exists()) return { id: snap.id, ...snap.data() };
-    return null;
+    return snap.exists() ? ({ id: snap.id, ...snap.data() }) : null;
 };
-
 
 exports.getAllGardenByName = async (user, name) => {
     const userID = await this.findUser(user.email)
@@ -572,30 +577,54 @@ exports.deleteSeason = async (user, id) => {
 
 // ========== SENSOR META ==========
 exports.addSensorMeta = async (user, payload) => {
-    const userID = await resolveUserId(user);
-    const docRef = await addDoc(collection(firebaseStore.db, 'sensorMeta'), {
-        ...payload,
-        user: userID,
+    const userID = await this.findUser(user.email);
+    const data = {
+        name: payload.name,
+        topic: payload.topic || 'Sensor_data',
+        type: payload.type || 'DHT',
+        gardenId: payload.gardenId || null, // null = chưa gắn
+        status: payload.gardenId ? 'online' : 'offline',
+        user: userID.id,
         timestamp: serverTimestamp()
-    });
+    };
+    const docRef = await addDoc(collection(firebaseStore.db, 'sensorMeta'), data);
     return docRef.id;
 };
 
-exports.getSensorsMeta = async (user) => {
-    const userID = await resolveUserId(user);
+exports.getSensorsMeta = async (user, gardenId) => {
+    const userID = await this.findUser(user.email);
     const colRef = collection(firebaseStore.db, 'sensorMeta');
     let qBase;
-    if (userID) {
-        qBase = query(colRef, where('user', '==', userID), orderBy('timestamp', 'desc'));
+    if (gardenId) {
+        qBase = query(colRef,
+            where('user', '==', userID.id),
+            where('gardenId', '==', gardenId),
+            orderBy('timestamp', 'desc')
+        );
     } else {
-        qBase = query(colRef, orderBy('timestamp', 'desc'));
+        qBase = query(colRef,
+            where('user', '==', userID.id),
+            orderBy('timestamp', 'desc')
+        );
     }
     const snap = await getDocs(qBase);
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 };
 
 exports.updateSensorMeta = async (user, id, updates) => {
-    await updateDoc(doc(firebaseStore.db, 'sensorMeta', id), { ...updates });
+    const ref = doc(firebaseStore.db, 'sensorMeta', id);
+    const toUpdate = { ...updates };
+    // Auto status theo gardenId
+    if ('gardenId' in updates) {
+        if (updates.gardenId) {
+            toUpdate.gardenId = updates.gardenId;
+            toUpdate.status = 'online';
+        } else {
+            toUpdate.gardenId = null;
+            toUpdate.status = 'offline';
+        }
+    }
+    await updateDoc(ref, toUpdate);
     return true;
 };
 

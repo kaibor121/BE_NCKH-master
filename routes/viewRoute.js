@@ -21,6 +21,9 @@ router.get('/logout', authController.logout);
 
 router.get('/gardens', authController.isLogin, authController.requireAuth, viewController.getAllGardenInfo);
 router.get('/garden/:name', authController.isLogin, viewController.getAllGardenInfoByName)
+router.get('/gardenById/:id', authController.isLogin, authController.requireAuth, viewController.getGardenById);
+
+
 
 router.post('/garden', authController.isLogin, viewController.addGardenInfo)
 router.patch('/garden/:name', authController.isLogin, viewController.updateGardenInfo)
